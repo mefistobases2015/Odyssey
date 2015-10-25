@@ -11,13 +11,13 @@ namespace RestComunication
         {
             RestTools rT = new RestTools();
 
-            bool isUser = rT.isUser("Arturito");
+            //bool isUser = rT.isUser("Arturito");
 
-            bool isPass = rT.isPassword("Braisman", "ojetedegringa");
+            //bool isPass = rT.isPassword("Braisman", "ojetedegringa");
 
-            bool isUsrC = rT.createUser("Hector", "elmascapo");
+            //bool isUsrC = rT.createUser("Hector", "elmascapo");
 
-            Console.WriteLine("isUser {0}, isPass {1}, isUsrC {2}", isUser, isPass, isUsrC);
+            //Console.WriteLine("isUser {0}, isPass {1}, isUsrC {2}", isUser, isPass, isUsrC);
 
             Console.Read();
         }
@@ -35,7 +35,6 @@ namespace RestComunication
         private string server_url = "http://odysseyop.azurewebsites.net/";
         private string format = "application/json";
         private string credentials_path = "api/Credenciales";
-        private bool flag = false;
         /**
         *Constructor vacío
         */
@@ -54,17 +53,9 @@ namespace RestComunication
             format = p_format;
         }
 
-        public bool isUser(string usr_name)
+        public async Task<bool> isUser(string usr_name)
         {
-            
-            isUserAux(usr_name).Wait();
-
-            return flag;
-
-        }
-
-        private async Task isUserAux(string usr_name)
-        {
+            bool flag = false;
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
@@ -82,19 +73,13 @@ namespace RestComunication
                     flag = false;
                 }
             }
-
-        }
-
-        public bool isPassword(string usr_name, string pass)
-        {
-
-            isPasswordAux(usr_name, pass).Wait();
-
             return flag;
+
         }
 
-        private async Task isPasswordAux(string usr_name, string password)
+        public async Task<bool> isPassword(string usr_name, string password)
         {
+            bool flag = false;
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
@@ -124,19 +109,12 @@ namespace RestComunication
                     flag = false;
                 }
             }
-        }
-
-        public bool createUser(string p_usr_name, string p_pass)
-        {
-
-            createUserAux(p_usr_name, p_pass).Wait();
-
             return flag;
-
         }
 
-        private async Task createUserAux(string p_usr_name, string p_pass)
+        public async Task<bool> createUser(string p_usr_name, string p_pass)
         {
+            bool flag = false;
 
             using (var client = new HttpClient())
             {
@@ -150,15 +128,17 @@ namespace RestComunication
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("Sirvio el post :-D");
+                    //Console.WriteLine("Sirvio el post :-D");
                     flag = true;
                 }
                 else
                 {
-                    Console.WriteLine("No sirvio el post D-: {0}", response.StatusCode);
+                    //Console.WriteLine("No sirvio el post D-: {0}", response.StatusCode);
                     flag = false;
                 }
             }
+
+            return flag;
 
         }
     }
