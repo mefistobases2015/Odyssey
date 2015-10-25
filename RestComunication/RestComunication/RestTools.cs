@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace RestComunication
 {
@@ -9,8 +10,12 @@ namespace RestComunication
     {
         private string server_url = "http://odysseyop.azurewebsites.net/";
         private string format = "application/json";
+
         private string credentials_path = "api/Credenciales";
-        /**
+        private string songs_path = "api/Canciones";
+        private string versions_path = "api/Versiones";
+        private string properties_path = "api/Propiedades";        
+       /**
         *Constructor vacío
         */
         public RestTools()
@@ -65,7 +70,7 @@ namespace RestComunication
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Credentials cred = await response.Content.ReadAsAsync<Credentials>();
+                    Credential cred = await response.Content.ReadAsAsync<Credential>();
 
                     string repassword = cred.pass;
 
@@ -97,7 +102,7 @@ namespace RestComunication
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
-                Credentials cred = new Credentials() { user_name = p_usr_name, pass = p_pass };
+                Credential cred = new Credential() { user_name = p_usr_name, pass = p_pass };
 
                 HttpResponseMessage response = await client.PostAsJsonAsync(credentials_path, cred);
 
@@ -117,6 +122,129 @@ namespace RestComunication
 
         }
 
+        public async Task<Song> createSong(string p_song_directory)
+        {
+
+            Song result= new Song();
+
+            Song song = new Song() { song_id = -1, metadata_id = -1, song_directory = p_song_directory };
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PostAsJsonAsync(songs_path, song);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Uri uri = response.Headers.Location;
+
+                    HttpResponseMessage response2 = await client.GetAsync(uri);
+
+                    result = await response2.Content.ReadAsAsync<Song>();
+
+                }
+                else
+                {
+                    result = null;
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Version> createVersion(List<String> new_version, Song song)
+        {
+            Version result = new Version();
+
+            Version ver = new Version(new_version, song.song_id);
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PostAsJsonAsync(versions_path, ver);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Uri uri = response.Headers.Location;
+
+                    HttpResponseMessage response2 = await client.GetAsync(uri);
+
+                    result = await response2.Content.ReadAsAsync<Version>();
+                }
+                else
+                {
+                    result = null;
+                }
+            }
+
+            return result;
+
+        }
+        
+        public async Task<Boolean> addSong2User(string p_user_name, string p_song_name, Song p_song)
+        {
+            bool flag = false;
+
+            Property prop = new Property() { user_name =  p_user_name, song_id = p_song.song_id, song_name = p_song_name}; 
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PostAsJsonAsync<Property>(properties_path, prop);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    flag = true;
+                }
+                else
+                {
+                    flag = false;
+                }
+            }
+
+            return flag;
+        }
+
+        public async Task<Boolean> add2SongList(string p_user_name, string p_song_name, 
+            string p_song_directory, List<String> new_version)
+        {
+            bool flag = false;
+            //se crea la cancion
+            Song song = await createSong(p_song_directory);
+            //se crea la version
+            Version ver = await createVersion(new_version, song);
+            //se actualiza el song metadata id
+            song.metadata_id = ver.version_id;
+            //se hace put de la actualizacion
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<Song>(songs_path + song.song_id, song);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    flag = await addSong2User(p_user_name, p_song_name, song);
+                }
+                else
+                {
+                    flag = false;
+                }
+            }
+
+            return flag;
+        }
 
 
     }
