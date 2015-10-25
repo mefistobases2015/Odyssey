@@ -34,9 +34,7 @@ namespace RestComunication
     {
         private string server_url = "http://odysseyop.azurewebsites.net/";
         private string format = "application/json";
-        //direccion de credenciales
         private string credentials_path = "api/Credenciales";
-        //bandera booleana 
         private bool flag = false;
         /**
         *Constructor vacío
@@ -46,17 +44,11 @@ namespace RestComunication
             //constructor vacion con valores default
         }
 
-        /**
-         * Cambio de url de server
-         */
         public RestTools(string p_server_url)
         {
             this.server_url = p_server_url;
         }
 
-        /**
-         * Cambio de formato
-         */
         public void setFormat(string p_format)
         {
             format = p_format;
@@ -64,57 +56,24 @@ namespace RestComunication
 
         public bool isUser(string usr_name)
         {
-            var client = new HttpClient();
-
-            client.BaseAddress = new Uri(server_url);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
-
-            isUserAux(client, usr_name).Wait();
+            
+            isUserAux(usr_name).Wait();
 
             return flag;
 
         }
 
-        private async Task isUserAux(HttpClient client, string usr_name)
+        private async Task isUserAux(string usr_name)
         {
-            HttpResponseMessage response = await client.GetAsync(credentials_path + "/" + usr_name);
-
-            if (response.IsSuccessStatusCode)
+            using (var client = new HttpClient())
             {
-                flag = true;
-            }
-            else
-            {
-                flag = false;
-            }
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
-        }
+                HttpResponseMessage response = await client.GetAsync(credentials_path + "/" + usr_name);
 
-        public bool isPassword(string usr_name, string pass)
-        {
-            var client = new HttpClient();
-
-            client.BaseAddress = new Uri(server_url);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
-
-            isPasswordAux(client, usr_name, pass).Wait();
-
-            return flag;
-        }
-
-        private async Task isPasswordAux(HttpClient client, string usr_name, string password)
-        {
-            HttpResponseMessage response = await client.GetAsync(credentials_path + "/"+ usr_name);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Credentials cred = await response.Content.ReadAsAsync<Credentials>();
-
-                string repassword = cred.pass;
-
-                if (repassword.CompareTo(password) == 0)
+                if (response.IsSuccessStatusCode)
                 {
                     flag = true;
                 }
@@ -122,13 +81,49 @@ namespace RestComunication
                 {
                     flag = false;
                 }
-
             }
-            else
+
+        }
+
+        public bool isPassword(string usr_name, string pass)
+        {
+
+            isPasswordAux(usr_name, pass).Wait();
+
+            return flag;
+        }
+
+        private async Task isPasswordAux(string usr_name, string password)
+        {
+            using (var client = new HttpClient())
             {
-                flag = false;
-            }
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
+                HttpResponseMessage response = await client.GetAsync(credentials_path + "/" + usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Credentials cred = await response.Content.ReadAsAsync<Credentials>();
+
+                    string repassword = cred.pass;
+
+                    if (repassword.CompareTo(password) == 0)
+                    {
+                        flag = true;
+                    }
+                    else
+                    {
+                        flag = false;
+                    }
+
+                }
+                else
+                {
+                    flag = false;
+                }
+            }
         }
 
         public bool createUser(string p_usr_name, string p_pass)
