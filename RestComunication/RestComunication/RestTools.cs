@@ -50,6 +50,7 @@ namespace RestComunication
                 }
                 else
                 {
+                    Console.WriteLine("\nCodigo de error {0}", response.StatusCode);
                     flag = false;
                 }
             }
@@ -139,16 +140,22 @@ namespace RestComunication
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Uri uri = response.Headers.Location;
+
+                    result = await response.Content.ReadAsAsync<Song>();
+
+                    Console.WriteLine("\nId de la cancion {0}", result.song_id);
+
+                    /*Uri uri = response.Headers.Location;
 
                     HttpResponseMessage response2 = await client.GetAsync(uri);
 
-                    result = await response2.Content.ReadAsAsync<Song>();
+                    result = await response2.Content.ReadAsAsync<Song>();*/
 
                 }
                 else
                 {
                     result = null;
+                    Console.WriteLine("\nCodigo de error {0}", response.StatusCode);
                 }
             }
 
@@ -172,23 +179,23 @@ namespace RestComunication
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Uri uri = response.Headers.Location;
 
-                    HttpResponseMessage response2 = await client.GetAsync(uri);
-
-                    ver = await response2.Content.ReadAsAsync<Version>();
+                    ver = await response.Content.ReadAsAsync<Version>();
 
                     song.metadata_id = ver.version_id;
 
-                    HttpResponseMessage upd_sng = await client.PutAsJsonAsync<Song>(songs_path + song.song_id, song);
+                    HttpResponseMessage updsng = await client.PutAsJsonAsync<Song>(songs_path + "/" + song.song_id, song);
 
-                    if (upd_sng.IsSuccessStatusCode)
+                    if (updsng.IsSuccessStatusCode)
                     {
-                        song = await upd_sng.Content.ReadAsAsync<Song>();
+                        song = await updsng.Content.ReadAsAsync<Song>();
+                        Console.WriteLine("\nSe creo correctamente, metadata_id {0}", song.metadata_id);
                     }
+
                     else
                     {
                         song = null;
+                        Console.WriteLine("\nError {0}", updsng.StatusCode);
                     }
                 }
                 else
@@ -199,6 +206,46 @@ namespace RestComunication
 
             return song;
 
+        }
+
+        public async Task<Song> createVersion(List<string> new_version, Song song)
+        {
+            Version ver = new Version(new_version, song.song_id);
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PostAsJsonAsync(versions_path, ver);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    ver = await response.Content.ReadAsAsync<Version>();
+
+                    song.metadata_id = ver.version_id;
+
+                    HttpResponseMessage updsng = await client.PutAsJsonAsync<Song>(songs_path + "/" + song.song_id, song);
+
+                    if (updsng.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("\nSe creo correctamente, metadata_id {0}", song.metadata_id);
+                    }
+                    else
+                    {
+                        song = null;
+                        Console.WriteLine("\nError {0}", updsng.StatusCode);
+                    }
+                }
+                else
+                {
+                    song = null;
+                }
+            }
+
+            return song;
         }
 
         public async Task<bool> addSong2user(string p_user_name, string p_song_name,
@@ -221,10 +268,41 @@ namespace RestComunication
                 if (response.IsSuccessStatusCode)
                 {
                     flag = true;
+                    Console.WriteLine("\nSe agrego bien la cancion");
                 }
                 else
                 {
                     flag = false;
+                    Console.WriteLine("\nEl codigo de error: {0}", response.StatusCode);
+                }
+            }
+
+            return flag;
+        }
+
+        public async Task<bool> addSong2user(string p_user_name, string p_song_name, Song song)
+        {
+            bool flag = false;
+
+            Property prop = new Property() { user_name = p_user_name, song_name = p_song_name, song_id = song.song_id };
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PostAsJsonAsync<Property>(properties_path, prop);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    flag = true;
+                    Console.WriteLine("\nSe agrego bien la cancion");
+                }
+                else
+                {
+                    flag = false;
+                    Console.WriteLine("\nEl codigo de error: {0}", response.StatusCode);
                 }
             }
 
@@ -251,19 +329,48 @@ namespace RestComunication
 
                 song.metadata_id = ver.version_id;
 
-                HttpResponseMessage sng_upd = await client.PutAsJsonAsync<Song>(songs_path + song.song_id, song);
+                HttpResponseMessage sng_upd = await client.PutAsJsonAsync<Song>(songs_path + "/" + song.song_id, song);
 
                 if (sng_upd.IsSuccessStatusCode)
                 {
                     flag = true;
+                    Console.WriteLine("\nSe agrego bien la cancion");
                 }
                 else
                 {
                     flag = false;
+                    Console.WriteLine("\nEl codigo de error: {0}", sng_upd.StatusCode);
                 }
             }
 
             return flag;
+        }
+
+        public async Task<Song> getSongById(int p_song_id)
+        {
+            Song song = new Song();
+
+            using(var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(songs_path + "/" + p_song_id);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("\nHubo ok con el server");
+                    song = await response.Content.ReadAsAsync<Song>();
+                }
+                else
+                {
+                    Console.WriteLine("\nAlgo salio mal D-: codigo {0}", response.StatusCode);
+                    song = null;
+                }
+            }
+
+            return song;
         }
 
     }

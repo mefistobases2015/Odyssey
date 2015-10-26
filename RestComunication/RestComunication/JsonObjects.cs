@@ -43,7 +43,6 @@ namespace RestComunication
 
         public Version(List<string> version, int p_song_id)
         {
-            version_id = -1;
             song_id = p_song_id;
 
             submission_date = version[0];
