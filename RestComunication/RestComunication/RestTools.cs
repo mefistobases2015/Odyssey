@@ -155,9 +155,10 @@ namespace RestComunication
             return result;
         }
 
-        public async Task<Version> createVersion(List<String> new_version, Song song)
+        public async Task<Song> createVersion(List<string> new_version, string p_song_directory)
         {
-            Version result = new Version();
+
+            Song song = await createSong(p_song_directory);
 
             Version ver = new Version(new_version, song.song_id);
 
@@ -175,25 +176,41 @@ namespace RestComunication
 
                     HttpResponseMessage response2 = await client.GetAsync(uri);
 
-                    result = await response2.Content.ReadAsAsync<Version>();
+                    ver = await response2.Content.ReadAsAsync<Version>();
+
+                    song.metadata_id = ver.version_id;
+
+                    HttpResponseMessage upd_sng = await client.PutAsJsonAsync<Song>(songs_path + song.song_id, song);
+
+                    if (upd_sng.IsSuccessStatusCode)
+                    {
+                        song = await upd_sng.Content.ReadAsAsync<Song>();
+                    }
+                    else
+                    {
+                        song = null;
+                    }
                 }
                 else
                 {
-                    result = null;
+                    song = null;
                 }
             }
 
-            return result;
+            return song;
 
         }
-        
-        public async Task<Boolean> addSong2User(string p_user_name, string p_song_name, Song p_song)
+
+        public async Task<bool> addSong2user(string p_user_name, string p_song_name,
+            List<string> new_version, string p_song_directory) 
         {
             bool flag = false;
 
-            Property prop = new Property() { user_name =  p_user_name, song_id = p_song.song_id, song_name = p_song_name}; 
+            Song song = await createVersion(new_version, p_song_directory);
 
-            using (var client = new HttpClient())
+            Property prop = new Property() { user_name = p_user_name, song_name = p_song_name, song_id = song.song_id };
+
+            using(HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -214,28 +231,31 @@ namespace RestComunication
             return flag;
         }
 
-        public async Task<Boolean> add2SongList(string p_user_name, string p_song_name, 
-            string p_song_directory, List<String> new_version)
+        public async Task<bool> setMetadataSong(int p_song_id, int p_version_id) 
         {
             bool flag = false;
-            //se crea la cancion
-            Song song = await createSong(p_song_directory);
-            //se crea la version
-            Version ver = await createVersion(new_version, song);
-            //se actualiza el song metadata id
-            song.metadata_id = ver.version_id;
-            //se hace put de la actualizacion
-            using (var client = new HttpClient())
+
+            using(HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
-                HttpResponseMessage response = await client.PutAsJsonAsync<Song>(songs_path + song.song_id, song);
+                HttpResponseMessage song_res = await client.GetAsync(songs_path);
 
-                if (response.IsSuccessStatusCode)
+                Song song = await song_res.Content.ReadAsAsync<Song>();
+
+                HttpResponseMessage ver_res = await client.GetAsync(versions_path);
+
+                Version ver = await ver_res.Content.ReadAsAsync<Version>();
+
+                song.metadata_id = ver.version_id;
+
+                HttpResponseMessage sng_upd = await client.PutAsJsonAsync<Song>(songs_path + song.song_id, song);
+
+                if (sng_upd.IsSuccessStatusCode)
                 {
-                    flag = await addSong2User(p_user_name, p_song_name, song);
+                    flag = true;
                 }
                 else
                 {
@@ -245,7 +265,6 @@ namespace RestComunication
 
             return flag;
         }
-
 
     }
 }
