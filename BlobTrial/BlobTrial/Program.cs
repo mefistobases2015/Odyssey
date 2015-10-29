@@ -28,6 +28,13 @@ namespace BlobTrial
                 {
                     blob.UploadFromStream(file);
                 }
+
+                /*CloudBlockBlob blob = sampleContainer.GetBlockBlobReference("APictureFile.jpg");
+                using (Stream outputFile = new FileStream("Downloaded.jpg", FileMode.Create))
+                {
+                    blob.DownloadToStream(outputFile);
+                }*/
+
             }
             catch (Exception ex)
             {
