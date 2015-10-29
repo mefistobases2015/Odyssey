@@ -14,7 +14,8 @@ namespace RestComunication
         private string credentials_path = "api/Credenciales";
         private string songs_path = "api/Canciones";
         private string versions_path = "api/Versiones";
-        private string properties_path = "api/Propiedades";        
+        private string properties_path = "api/Propiedades";
+        private string songs_by_user = "api/CancionesUsuario";
        /**
         *Constructor vacío
         */
@@ -373,5 +374,44 @@ namespace RestComunication
             return song;
         }
 
+        public async Task<List<List<string>>> getMetadataSongByUser(string user_name)
+        {
+            List<List<string>> songs_metadata = new List<List<string>>();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(songs_by_user + "/" + user_name);
+
+                MetadataAndSong[] sngs_n_met = await response.Content.ReadAsAsync<MetadataAndSong[]>();
+
+                for (int i = 0; i < sngs_n_met.Length; i++)
+                {
+                    List<string> song_met = new List<string>();
+
+                    song_met.Add(sngs_n_met[i].user_name);
+                    song_met.Add(sngs_n_met[i].song_id.ToString());
+                    song_met.Add(sngs_n_met[i].song_name);
+                    song_met.Add(sngs_n_met[i].metadata_id.ToString());
+                    song_met.Add(sngs_n_met[i].song_dir);
+                    song_met.Add(sngs_n_met[i].date);
+                    song_met.Add(sngs_n_met[i].title);
+                    song_met.Add(sngs_n_met[i].author);
+                    song_met.Add(sngs_n_met[i].lyrics);
+                    song_met.Add(sngs_n_met[i].album);
+                    song_met.Add(sngs_n_met[i].genre);
+                    song_met.Add(sngs_n_met[i].year.ToString());
+
+                    songs_metadata.Add(song_met);
+                }
+
+            }
+
+            return songs_metadata;
+
+        }
     }
 }

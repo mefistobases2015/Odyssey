@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RestComunication
 {
@@ -63,6 +60,23 @@ namespace RestComunication
         public string user_name { set; get; }
         public int song_id { set; get; }
         public string song_name { set; get; }
+    }
+
+    class MetadataAndSong
+    {
+        public string user_name { get; set; }
+        public int song_id { get; set; }
+        public string song_name { get; set; }
+        public int metadata_id { get; set; }
+        public string song_dir { get; set; }
+        public string date { get; set; }
+        public string title { get; set; }
+        public string author { get; set; }
+        public string lyrics { get; set; }
+        public string album { get; set; }
+        public string genre { get; set; }
+        public int year { get; set; }
+
     }
 
 }
