@@ -15,7 +15,7 @@ namespace RestComunication
         static string accountName = "odysseyblob";
         static string accountKey = "+LNzgFo5XOB7J7lFffed0oEha5qUDN+8aV3fIbBk8B2eeAFk/VxAwmfyBv0gk7WuSMJewyOu5R2Bnu8O0jUtKA==";
 
-        public bool uploadSong(string song_path, string song_name)
+        public bool uploadSong(int song_id, string song_path, string song_name)
         {
             bool flag = false;
 
@@ -30,7 +30,7 @@ namespace RestComunication
             CloudBlobContainer sampleContainer = client.GetContainerReference("music");
             sampleContainer.CreateIfNotExists();
             //
-            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_name);
+            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_id.ToString() + song_name);
             using (System.IO.Stream file = System.IO.File.OpenRead(song_path))
             {
                 try
@@ -50,7 +50,7 @@ namespace RestComunication
             return flag;
         }
 
-        public bool downloadSong(string song_path, string song_name)
+        public bool downloadSong(int song_id, string song_path, string song_name)
         {
             bool flag = false;
 
@@ -64,7 +64,7 @@ namespace RestComunication
             //crae el contenedor
             CloudBlobContainer sampleContainer = client.GetContainerReference("music");
 
-            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_name);
+            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_id.ToString() + song_name);
 
             using (Stream outputFile = new FileStream(song_path, FileMode.Create))
             {
