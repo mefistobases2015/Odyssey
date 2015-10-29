@@ -392,18 +392,18 @@ namespace RestComunication
                 {
                     List<string> song_met = new List<string>();
 
+                    song_met.Add(sngs_n_met[i].author);
+                    song_met.Add(sngs_n_met[i].title);
+                    song_met.Add(sngs_n_met[i].album);
+                    song_met.Add(sngs_n_met[i].year.ToString());
+                    song_met.Add(sngs_n_met[i].genre);
+                    song_met.Add(sngs_n_met[i].lyrics);
                     song_met.Add(sngs_n_met[i].user_name);
                     song_met.Add(sngs_n_met[i].song_id.ToString());
                     song_met.Add(sngs_n_met[i].song_name);
                     song_met.Add(sngs_n_met[i].metadata_id.ToString());
                     song_met.Add(sngs_n_met[i].song_dir);
                     song_met.Add(sngs_n_met[i].date);
-                    song_met.Add(sngs_n_met[i].title);
-                    song_met.Add(sngs_n_met[i].author);
-                    song_met.Add(sngs_n_met[i].lyrics);
-                    song_met.Add(sngs_n_met[i].album);
-                    song_met.Add(sngs_n_met[i].genre);
-                    song_met.Add(sngs_n_met[i].year.ToString());
 
                     songs_metadata.Add(song_met);
                 }
