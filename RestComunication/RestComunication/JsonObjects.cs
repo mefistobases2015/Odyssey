@@ -42,15 +42,13 @@ namespace RestComunication
         {
             song_id = p_song_id;
 
-            submission_date = version[0];
+            id3v2_author = version[0];
             id3v2_title = version[1];
-            id3v2_author = version[2];
-            id3v2_lyrics = version[3];
-            id3v2_album = version[4];
-            id3v2_genre = version[5];
-
-            id3v2_year = Convert.ToInt32(version[6]);
-
+            id3v2_album = version[2];
+            id3v2_year = Convert.ToInt32(version[3]);
+            id3v2_genre = version[4];
+            id3v2_lyrics = version[5];
+            submission_date = version[6];
         }
 
     }

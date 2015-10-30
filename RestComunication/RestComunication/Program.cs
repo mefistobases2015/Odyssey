@@ -9,14 +9,17 @@ namespace RestComunication
     {
         static void Main(string[] args)
         {
-            try
+            /*try
             {
                 RunAsync().Wait();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-            }
+            }*/
+
+            BlobManager bm = new BlobManager();
+            bm.downloadSong("Braiman", 6, "Magnets.mp3", "C:\\Users\\Andres\\Music");
 
             Console.Read();
             
@@ -26,33 +29,28 @@ namespace RestComunication
         {
             RestTools rT = new RestTools();
 
-            Song result = await rT.getSongById(5);
+            Song song = await rT.getSongById(6);
 
-            if(result != null)
+            if(song == null)
             {
-                Console.WriteLine("id de la cancion {0} metadata {1} directorio {2}", 
-                    result.song_id, result.metadata_id, result.song_directory);
-
-                List<string> lista = new List<string>();
-
-                lista.Add("2005-04-26 03:00:00");
-                lista.Add("sample song");
-                lista.Add("Braisman");
-                lista.Add("#yolo #suaj #uknow");
-                lista.Add("The best of the best of Braisman");
-                lista.Add("braisman style");
-                lista.Add("2001");
-
-                result = await rT.createVersion(lista, result);
-
-                Console.WriteLine("\nid de la cancion {0} metadata {1} directorio {2}",
-                    result.song_id, result.metadata_id, result.song_directory);
-
+                Console.WriteLine("Algo salió mal D:");
             }
             else
             {
-                Console.WriteLine("Algo salió mal D-: 0");
+                BlobManager bm = new BlobManager();
+
+                bool result = bm.uploadSong("Braisman", song.song_id, song.song_directory);
+
+                if (!result)
+                {
+                    Console.WriteLine("No se pudo subir la canción D-:");
+                }
+                else
+                {
+                    Console.WriteLine("La canción se subió correctamente :-D");
+                }
             }
+
         }
     }
 

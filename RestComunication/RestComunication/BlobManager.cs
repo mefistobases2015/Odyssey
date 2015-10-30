@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
+using System.Security.Permissions;
 
 namespace RestComunication
 {
     class BlobManager
     {
-        static string accountName = "odysseyblob";
-        static string accountKey = "+LNzgFo5XOB7J7lFffed0oEha5qUDN+8aV3fIbBk8B2eeAFk/VxAwmfyBv0gk7WuSMJewyOu5R2Bnu8O0jUtKA==";
+        private static string accountName = "odysseyblob";
+        private static string accountKey = "+LNzgFo5XOB7J7lFffed0oEha5qUDN+8aV3fIbBk8B2eeAFk/VxAwmfyBv0gk7WuSMJewyOu5R2Bnu8O0jUtKA==";
 
-        public bool uploadSong(int song_id, string song_path, string song_name)
+        public bool uploadSong(string usr_name, int song_id, string song_path)
         {
             bool flag = false;
 
@@ -27,10 +24,10 @@ namespace RestComunication
             CloudBlobClient client = account.CreateCloudBlobClient();
 
             //crae el contenedor
-            CloudBlobContainer sampleContainer = client.GetContainerReference("music");
-            sampleContainer.CreateIfNotExists();
+            CloudBlobContainer container = client.GetContainerReference(usr_name.ToLower());
+            container.CreateIfNotExists();
             //
-            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_id.ToString() + song_name);
+            CloudBlockBlob blob = container.GetBlockBlobReference(song_id.ToString() + ".mp3");
             using (System.IO.Stream file = System.IO.File.OpenRead(song_path))
             {
                 try
@@ -50,7 +47,7 @@ namespace RestComunication
             return flag;
         }
 
-        public bool downloadSong(int song_id, string song_path, string song_name)
+       /* public bool downloadSong(string usr_name,  int song_id, string song_name, string song_path)
         {
             bool flag = false;
 
@@ -62,27 +59,27 @@ namespace RestComunication
             CloudBlobClient client = account.CreateCloudBlobClient();
 
             //crae el contenedor
-            CloudBlobContainer sampleContainer = client.GetContainerReference("music");
+            CloudBlobContainer sampleContainer = client.GetContainerReference(usr_name);
 
-            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_id.ToString() + song_name);
+            CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_id.ToString() + ".mp3");
 
-            using (Stream outputFile = new FileStream(song_path, FileMode.Create))
+            try
             {
-                try
-                {
-                    blob.DownloadToStream(outputFile);
-                    flag = true;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    flag = false;
-                }
-                
+                //FileIOPermission permission = new FileIOPermission(FileIOPermissionAccess.AllAccess, "C:\\Users\\Andres\\Music");
+                Console.WriteLine("Path: {0}", song_path + "\\" + song_name);
+                Stream outputFile = new FileStream(song_path + "\\" + song_name, FileMode.Create);
+
+                blob.DownloadToStream(outputFile);
+                flag = true;
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e);
+               flag = false;
             }
 
             return flag;
-        }
+        }*/
 
     }
 }
