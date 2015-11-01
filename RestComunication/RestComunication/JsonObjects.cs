@@ -91,4 +91,10 @@ namespace RestComunication
         public string _SongID { get; set; }
     }
 
+    public class Solicitud
+    {
+        public string emisor { get; set; }
+        public string receptor { get; set; }
+    }
+
 }

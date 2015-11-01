@@ -751,5 +751,91 @@ namespace RestComunication
             return result;
         }
 
+        public async Task<List<Solicitud>> getRequests(string usr_name)
+        {
+            List<Solicitud> requests = new List<Solicitud>();
+
+            using(HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(friend_request_path+"/"+usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Solicitud[] requests_array = await response.Content.ReadAsAsync<Solicitud[]>();
+
+                    for(int i = 0; i < requests_array.Length; i++)
+                    {
+                        requests.Add(requests_array[i]);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return requests;
+        } 
+
+        public async Task<bool> setRequest(string p_emisor, string p_receptor)
+        {
+            bool result = false;
+
+            Solicitud request = new Solicitud() { emisor = p_emisor, receptor = p_receptor };
+
+            using(HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PostAsJsonAsync<Solicitud>(friend_request_path, request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = false;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> deleteRequest(string p_emisor, string p_receptor)
+        {
+            bool result = false;
+
+            Solicitud request = new Solicitud() { emisor = p_emisor, receptor = p_receptor };
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync(friend_request_path, request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = false;
+                }
+            }
+
+            return false;
+        }
+
     }
 }
