@@ -51,6 +51,18 @@ namespace RestComunication
             submission_date = version[6];
         }
 
+        public Version(Metadata met)
+        {
+            song_id = Convert.ToInt32(met._SongID);
+
+            id3v2_title = met._ID3Title;
+            id3v2_author = met._ID3Artist;
+            id3v2_album = met._ID3Album;
+            id3v2_year = Convert.ToInt32(met._ID3Year);
+            id3v2_genre = met._ID3Genre;
+            id3v2_lyrics = met._ID3Lyrics;
+            submission_date = met._SubmissionDate;
+        }
     }
 
     public class Property
@@ -74,7 +86,6 @@ namespace RestComunication
         public string id3v2_album { get; set; }
         public string id3v2_genre { get; set; }
         public int year { get; set; }
-
     }
 
     public class Metadata
@@ -95,6 +106,12 @@ namespace RestComunication
     {
         public string emisor { get; set; }
         public string receptor { get; set; }
+    }
+
+    public class Comment
+    {
+        public string autor { get; set; }
+        public string cmt { get; set; }
     }
 
 }
