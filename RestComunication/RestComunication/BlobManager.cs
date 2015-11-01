@@ -47,7 +47,7 @@ namespace RestComunication
             return flag;
         }
 
-       /* public bool downloadSong(string usr_name,  int song_id, string song_name, string song_path)
+        public bool downloadSong(string usr_name,  int song_id, string song_name, string song_path)
         {
             bool flag = false;
 
@@ -59,9 +59,11 @@ namespace RestComunication
             CloudBlobClient client = account.CreateCloudBlobClient();
 
             //crae el contenedor
-            CloudBlobContainer sampleContainer = client.GetContainerReference(usr_name);
+            CloudBlobContainer sampleContainer = client.GetContainerReference(usr_name.ToLower());
 
             CloudBlockBlob blob = sampleContainer.GetBlockBlobReference(song_id.ToString() + ".mp3");
+
+            
 
             try
             {
@@ -79,7 +81,8 @@ namespace RestComunication
             }
 
             return flag;
-        }*/
+        }
+
 
     }
 }

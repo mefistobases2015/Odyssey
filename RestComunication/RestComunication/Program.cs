@@ -9,17 +9,26 @@ namespace RestComunication
     {
         static void Main(string[] args)
         {
-            /*try
+            try
             {
                 RunAsync().Wait();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-            }*/
+            }
 
-            BlobManager bm = new BlobManager();
-            bm.downloadSong("Braiman", 6, "Magnets.mp3", "C:\\Users\\Andres\\Music");
+            /*BlobManager bm = new BlobManager();
+            bool flag = bm.downloadSong("Braisman", 6, "Magnets.mp3", "C:\\Users\\Andres\\Music");
+
+            if (flag)
+            {
+                Console.WriteLine("Descarga completada");
+            }
+            else
+            {
+                Console.WriteLine("No se pudo realizar la descarga");
+            }*/
 
             Console.Read();
             
@@ -29,7 +38,40 @@ namespace RestComunication
         {
             RestTools rT = new RestTools();
 
-            Song song = await rT.getSongById(6);
+            List<List<string>> res = await rT.getMetadataSongByUser("Braisman");
+
+            if (res.Count > 0)
+            {
+                Console.WriteLine("#TodoSalioBien:-D");
+
+                for(int i = 0; i < res.Count; i++)
+                {
+                    for(int j = 0; j < res[i].Count; j++)
+                    {
+                        Console.Write(res[i][j] + " ");
+                    }
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("#MeCagoEnTodoD-:");
+            }
+
+          //  await rT.getMetadataSong("Braisman");
+
+           /* String result = await rT.getMusicalByUserName("Satan");
+
+            if (result.Length > 0)
+            {
+                Console.WriteLine("Todo salio bien :-D musical = {0}", result);
+            }
+            else
+            {
+                Console.WriteLine("Error satanico D-:");
+            }*/
+
+            /*Song song = await rT.getSongById(6);
 
             if(song == null)
             {
@@ -49,7 +91,7 @@ namespace RestComunication
                 {
                     Console.WriteLine("La canción se subió correctamente :-D");
                 }
-            }
+            }*/
 
         }
     }

@@ -60,21 +60,35 @@ namespace RestComunication
         public string song_name { set; get; }
     }
 
-    class MetadataAndSong
+    public class MetadataAndSong
     {
         public string user_name { get; set; }
         public int song_id { get; set; }
         public string song_name { get; set; }
         public int metadata_id { get; set; }
-        public string song_dir { get; set; }
-        public string date { get; set; }
-        public string title { get; set; }
-        public string author { get; set; }
-        public string lyrics { get; set; }
-        public string album { get; set; }
-        public string genre { get; set; }
+        public string song_directory { get; set; }
+        public string submission_date { get; set; }
+        public string id3v2_title { get; set; }
+        public string id3v2_author { get; set; }
+        public string id3v2_lyrics { get; set; }
+        public string id3v2_album { get; set; }
+        public string id3v2_genre { get; set; }
         public int year { get; set; }
 
+    }
+
+    public class Metadata
+    {
+        public string _ID3Title { get; set; }
+        public string _ID3Artist { get; set; }
+        public string _ID3Album { get; set; }
+        public string _ID3Year { get; set; }
+        public string _ID3Genre { get; set; }
+        public string _ID3Comment { get; set; }
+        public string _ID3Lyrics { get; set; }
+        public string _SubmissionDate { get; set; }
+        public string _SongDirectory { get; set; }
+        public string _SongID { get; set; }
     }
 
 }

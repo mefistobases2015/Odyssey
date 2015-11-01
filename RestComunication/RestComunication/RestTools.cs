@@ -11,14 +11,17 @@ namespace RestComunication
         private string server_url = "http://odysseyop.azurewebsites.net/";
         private string format = "application/json";
 
-        private string credentials_path = "api/Credenciales";
-        private string songs_path = "api/Canciones";
-        private string versions_path = "api/Versiones";
-        private string properties_path = "api/Propiedades";
-        private string songs_by_user = "api/CancionesUsuario";
-       /**
-        *Constructor vacío
-        */
+        private const string credentials_path = "api/Credenciales";
+        private const string songs_path = "api/Canciones";
+        private const string versions_path = "api/Versiones";
+        private const string properties_path = "api/Propiedades";
+        private const string songs_by_user_path = "api/CancionesUsuario";
+        private const string mongo_songs_path = "api/CancionesMongo";
+        private const string friend_request_path = "api/Solicitud";
+        private const string mongo_users_path = "api/Usuarios";
+        /**
+         *Constructor vacío
+         */
         public RestTools()
         {
             //constructor vacion con valores default
@@ -127,7 +130,7 @@ namespace RestComunication
         public async Task<Song> createSong(string p_song_directory)
         {
 
-            Song result= new Song();
+            Song result = new Song();
 
             Song song = new Song() { song_id = -1, metadata_id = -1, song_directory = p_song_directory };
 
@@ -250,7 +253,7 @@ namespace RestComunication
         }
 
         public async Task<bool> addSong2user(string p_user_name, string p_song_name,
-            List<string> new_version, string p_song_directory) 
+            List<string> new_version, string p_song_directory)
         {
             bool flag = false;
 
@@ -258,14 +261,13 @@ namespace RestComunication
 
             Property prop = new Property() { user_name = p_user_name, song_name = p_song_name, song_id = song.song_id };
 
-            using(HttpClient client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
                 HttpResponseMessage response = await client.PostAsJsonAsync<Property>(properties_path, prop);
-
                 if (response.IsSuccessStatusCode)
                 {
                     flag = true;
@@ -310,11 +312,11 @@ namespace RestComunication
             return flag;
         }
 
-        public async Task<bool> setMetadataSong(int p_song_id, int p_version_id) 
+        public async Task<bool> setMetadataSong(int p_song_id, int p_version_id)
         {
             bool flag = false;
 
-            using(HttpClient client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -351,7 +353,7 @@ namespace RestComunication
         {
             Song song = new Song();
 
-            using(var client = new HttpClient())
+            using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(server_url);
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -384,7 +386,7 @@ namespace RestComunication
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
-                HttpResponseMessage response = await client.GetAsync(songs_by_user + "/" + user_name);
+                HttpResponseMessage response = await client.GetAsync(songs_by_user_path + "/" + user_name);
 
                 MetadataAndSong[] sngs_n_met = await response.Content.ReadAsAsync<MetadataAndSong[]>();
 
@@ -392,18 +394,18 @@ namespace RestComunication
                 {
                     List<string> song_met = new List<string>();
 
-                    song_met.Add(sngs_n_met[i].author);
-                    song_met.Add(sngs_n_met[i].title);
-                    song_met.Add(sngs_n_met[i].album);
+                    song_met.Add(sngs_n_met[i].id3v2_author);
+                    song_met.Add(sngs_n_met[i].id3v2_title);
+                    song_met.Add(sngs_n_met[i].id3v2_album);
                     song_met.Add(sngs_n_met[i].year.ToString());
-                    song_met.Add(sngs_n_met[i].genre);
-                    song_met.Add(sngs_n_met[i].lyrics);
+                    song_met.Add(sngs_n_met[i].id3v2_genre);
+                    song_met.Add(sngs_n_met[i].id3v2_lyrics);
                     song_met.Add(sngs_n_met[i].user_name);
                     song_met.Add(sngs_n_met[i].song_id.ToString());
                     song_met.Add(sngs_n_met[i].song_name);
                     song_met.Add(sngs_n_met[i].metadata_id.ToString());
-                    song_met.Add(sngs_n_met[i].song_dir);
-                    song_met.Add(sngs_n_met[i].date);
+                    song_met.Add(sngs_n_met[i].song_directory);
+                    song_met.Add(sngs_n_met[i].submission_date);
 
                     songs_metadata.Add(song_met);
                 }
@@ -413,5 +415,341 @@ namespace RestComunication
             return songs_metadata;
 
         }
+
+        /*public async Task<List<List<Metadata>>> getMetadataSongByUser(string user_name)
+        {
+
+        }*/
+
+        public async Task<bool> getMetadataSong(string user_name)
+        {
+            bool result = false;
+
+            using(HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(songs_by_user_path + "/" + user_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MetadataAndSong[] res = await response.Content.ReadAsAsync<MetadataAndSong[]>();
+                    for (int i = 0; i < res.Length; i++)
+                    {
+                        Console.Write(res[i].user_name+", ");
+                        Console.Write(res[i].song_id+ ", ");
+                        Console.Write(res[i].song_name+ ", ");
+                        Console.Write(res[i].metadata_id+ ", ");
+                        Console.Write(res[i].song_directory+ ", ");
+                        Console.Write(res[i].submission_date+ ", ");
+                        Console.Write(res[i].id3v2_title+ ", ");
+                        Console.Write(res[i].id3v2_author+ ", ");
+                        Console.Write(res[i].id3v2_lyrics+ ", ");
+                        Console.Write(res[i].id3v2_album + ", ");
+                        Console.Write(res[i].year + ", ");
+                        Console.WriteLine();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("\nStatus Code {0}\n", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<string> getMusicalByUserName(string usr_id)
+        {
+            string res = "";
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path + "/Musical?id=" + usr_id);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    res = await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    res = "";
+                }
+            }
+
+            return res;
+        }
+
+        public async Task<string> getSocialByUserName(string usr_name)
+        {
+            string res = "";
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path + "/Musical?id=" + usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    res = await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    Console.WriteLine("Codigo de respuesta {0}", response.StatusCode);
+                    res = "";
+                }
+            }
+
+            return res;
+        }
+
+        public async Task<bool> addFriendByUserName(string usr_name, string friend_usr_name)
+        {
+            bool res_status = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<string>(mongo_users_path + "/Amigos?id=" + usr_name,
+                    friend_usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    res_status = true;
+                }
+                else
+                {
+                    res_status = false;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return res_status;
+        }
+
+        public async Task<bool> setLike2ASong(int song_id)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<String>(mongo_songs_path + "/Like?id=" + song_id.ToString(),
+                    "");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<bool> setDislike2ASong(int song_id)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<String>(mongo_songs_path + "/Dislike?id=" + song_id.ToString(),
+                    "");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<bool> setPlay2ASong(int song_id)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<String>(mongo_songs_path + "/Play?id=" + song_id.ToString(),
+                    "");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<bool> setComment2ASong(int song_id, string comment)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<String>(mongo_songs_path + "/Comment?id=" + song_id.ToString(),
+                    comment);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<int> getSongLikes(int song_id)
+        {
+            int result = 0;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_songs_path + "/Like?id=" + song_id.ToString());
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = Convert.ToInt32(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    result = -1;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+
+                return result;
+            }
+
+        }
+
+        public async Task<int> getSongDislkes(int song_id)
+        {
+            int result = 0;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_songs_path + "/Dislike?id=" + song_id.ToString());
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = Convert.ToInt32(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    result = -1;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+
+                return result;
+            }
+        }
+
+        public async Task<int> getSongPlays(int song_id)
+        {
+            int result = 0;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_songs_path + "/Play?id=" + song_id.ToString());
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = Convert.ToInt32(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    result = -1;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<int> getSongComments(int song_id)
+        {
+            int result = 0;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_songs_path + "/Comment?id=" + song_id.ToString());
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = Convert.ToInt32(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    result = -1;
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return result;
+        }
+
     }
 }
