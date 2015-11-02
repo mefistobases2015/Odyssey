@@ -1130,9 +1130,9 @@ namespace RestComunication
         /// List<Solicitud> que tiene las solicitudes que se le hicieron a un
         /// usuario
         /// </returns>
-        public async Task<List<Solicitud>> getRequests(string usr_name)
+        public async Task<List<string>> getRequests(string usr_name)
         {
-            List<Solicitud> requests = new List<Solicitud>();
+            List<string> requests = new List<string>();
 
             using (HttpClient client = new HttpClient())
             {
@@ -1144,7 +1144,7 @@ namespace RestComunication
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Solicitud[] requests_array = await response.Content.ReadAsAsync<Solicitud[]>();
+                    string[] requests_array = await response.Content.ReadAsAsync<string[]>();
 
                     for (int i = 0; i < requests_array.Length; i++)
                     {
@@ -1259,7 +1259,7 @@ namespace RestComunication
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
-                HttpResponseMessage response = await client.GetAsync(mongo_users_path+"/"+usr_name);
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path+"/Amigos?id="+usr_name);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -1283,6 +1283,326 @@ namespace RestComunication
             return result;
         }
 
+        /// <summary>
+        /// Obtiene las recomendaciones de amistad de un usuario
+        /// </summary>
+        /// <param name="usr_name">
+        /// Nombre de usuario al que se le van a recomendar amigos
+        /// </param>
+        /// <returns>
+        /// Lista con los nombres de los amigos que se le recomendaron
+        /// </returns>
+        public async Task<List<string>> getRecomendedFriends(string usr_name)
+        {
+            List<string> list = new List<string>();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path+"/Recomendar?id="+usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string[] tmp = await response.Content.ReadAsAsync<string[]>();
+
+                    for(int i = 0; i < tmp.Length; i++)
+                    {
+                        list.Add(tmp[i]);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+            return list;
+         }
+
+        /// <summary>
+        /// Se obtiene la cantidad amigos
+        /// </summary>
+        /// <param name="usr_name">
+        /// Nombre de usuario al que se le quiere ver la cantidad
+        /// de amigos
+        /// </param>
+        /// <returns>
+        /// int que es la cantidad de amigos
+        /// </returns>
+        public async Task<int> getFriendsQuantity(string usr_name)
+        {
+            int result = -1;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path+"CantidadAmigos?id="+usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = await response.Content.ReadAsAsync<int>();
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+                return result;
+        }
+
+        /// <summary>
+        /// Cambia el estado de conexión del usuario en la aplicación
+        /// web
+        /// </summary>
+        /// <param name="state">
+        /// bool que es el estado de conexion
+        /// </param>
+        /// <returns>
+        /// bool que es true si se completa la acción, en cualquier otro
+        /// caso es false;
+        /// </returns>
+        public async Task<bool> setConnectedState(bool state)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<string>(mongo_users_path+"/Conectado?id="+state.ToString()
+                    ,"");
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                }
+            }
+
+                return result;
+        } 
+
+        /// <summary>
+        /// Obtiene la popularidad de un usuario
+        /// </summary>
+        /// <param name="usr_id">
+        /// Identificador de usuario
+        /// </param>
+        /// <returns>
+        /// indice de popularidad debido a los amigos
+        /// </returns>
+        public async Task<int> getPopularityByFriends(string usr_id)
+        {
+            int popularity = -1;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path+"/Popular?id="+usr_id);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    popularity = await response.Content.ReadAsAsync<int>();
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                }
+            }
+
+                return popularity;
+        }
+
+        /// <summary>
+        /// Establece un indice de popularidad a un usario
+        /// </summary>
+        /// <param name="popularity"></param>
+        /// <returns></returns>
+        public async Task<bool> setPopularity(string usr_name, int popularity)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.PutAsJsonAsync<int>(mongo_users_path+"/Popular?id="+usr_name,popularity);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = false;
+                }
+
+            }
+
+                return result;
+        }
+
+        /// <summary>
+        /// Elimina un usuario de la base
+        /// </summary>
+        /// <param name="usr_id">
+        /// Identificador del usuario 
+        /// </param>
+        /// <returns>
+        /// bool que es true si se cumple el delete, false 
+        /// en cualquier otro caso.
+        /// </returns>
+        public async Task<bool> deleteUser(string usr_id)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.DeleteAsync(mongo_users_path+"/"+usr_id);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = false;
+                }
+
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Obtiene la popularidad debido a comentarios
+        /// </summary>
+        /// <param name="user_id">
+        /// nombre del usuario al que se le va a obtener las
+        /// la popularidad
+        /// </param>
+        /// <returns>
+        /// int que es el nivel de popularidad
+        /// </returns>
+        public async Task<int> getPopularityByComments(string user_id)
+        {
+            int result = -1;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_songs_path+"/Popular?id="+user_id);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = await response.Content.ReadAsAsync<int>();
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = -1;
+                }
+            }
+
+                return result;
+        }
+
+        /// <summary>
+        /// Se elimina una credencial de la base 
+        /// </summary>
+        /// <param name="user_id">
+        /// Identificador de la credencial a borrar
+        /// </param>
+        /// <returns>
+        /// retorna un bool que es true si se logra borrar la credencial. En
+        /// cualquier otro caso es false.
+        /// </returns>
+        public async Task<bool> deleteCredential(string user_id)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.DeleteAsync(credentials_path +"/"+user_id);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Borra una version de la tabla de versiones
+        /// </summary>
+        /// <param name="version_id">
+        /// Version a borrar 
+        /// </param>
+        /// <returns>
+        /// bool que es true si se ejecuta la acción, en 
+        /// caso contrario retorna false
+        /// </returns>
+        public async Task<bool> deleteVersion(int version_id)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.DeleteAsync(versions_path+"/"+version_id.ToString());
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+                    result = false;
+                }
+            }
+
+            return result;
+        }
 
     }
 }

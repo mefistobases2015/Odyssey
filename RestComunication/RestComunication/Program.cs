@@ -27,16 +27,17 @@ namespace RestComunication
         {
             RestTools rT = new RestTools();
 
-            List<string> res = await rT.getSongComments(7);
+            List<string> res = await rT.getRequests("Arturito");
 
             if (res.Count > 0)
             {
                 Console.WriteLine("#YOLO#SOYUNPRO#OP#:-D");
 
-                for(int i =0; i < res.Count; i++)
+                for(int i = 0; i < res.Count; i++)
                 {
-                    Console.Write(res[i]+", |");
+                    Console.Write(res[i] + ", ");
                 }
+                Console.WriteLine();
             }
             else
             {
