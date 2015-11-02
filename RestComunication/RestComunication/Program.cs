@@ -27,15 +27,20 @@ namespace RestComunication
         {
             RestTools rT = new RestTools();
 
-            bool res = await rT.setPlay2ASong(7);
+            List<string> res = await rT.getSongComments(7);
 
-            if (!res)
+            if (res.Count > 0)
             {
-                Console.WriteLine("#No salió bien");
+                Console.WriteLine("#YOLO#SOYUNPRO#OP#:-D");
+
+                for(int i =0; i < res.Count; i++)
+                {
+                    Console.Write(res[i]+", |");
+                }
             }
             else
             {
-                Console.WriteLine("#TodoSalióBien:-D");
+                Console.WriteLine("#MeLaCorto#PutaMierda#QueSal#D-:");
             }
 
         }

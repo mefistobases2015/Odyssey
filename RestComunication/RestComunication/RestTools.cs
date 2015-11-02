@@ -212,7 +212,7 @@ namespace RestComunication
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
 
-                HttpResponseMessage response = await client.PostAsJsonAsync<string>(mongo_users_path + "?values=" + user_name, "");
+                HttpResponseMessage response = await client.PostAsJsonAsync<string>(mongo_users_path + "?value=" + user_name, "");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -1077,10 +1077,19 @@ namespace RestComunication
             return result;
         }
 
-
-        public async Task<string> getSongComments(int song_id)
+        /// <summary>
+        /// Obtiene los comentarios y que los hizo
+        /// </summary>
+        /// <param name="song_id">
+        /// Identificador de la canción de la que se 
+        /// quieren obtener los comentarios
+        /// </param>
+        /// <returns>
+        /// List de string que tiene comentarios y quien los hizo
+        /// </returns>
+        public async Task<List<string>> getSongComments(int song_id)
         {
-            string result = "";
+            List<string> result = new List<string>();
 
             using (HttpClient client = new HttpClient())
             {
@@ -1092,7 +1101,12 @@ namespace RestComunication
 
                 if (response.IsSuccessStatusCode)
                 {
-                    result = await response.Content.ReadAsAsync<String>();
+                    string[] res = await response.Content.ReadAsAsync<string[]>();
+
+                    for (int i = 0; i < res.Length; i++)
+                    {
+                        result.Add(res[i]);
+                    }
                 }
                 else
                 {
@@ -1225,6 +1239,50 @@ namespace RestComunication
 
             return result;
         }
+
+        /// <summary>
+        /// Retorna una lista de amigos
+        /// </summary>
+        /// <param name="usr_name">
+        /// Nombre de usario al que se le van a ver los amigos
+        /// </param>
+        /// <returns>
+        /// List de string que tiene todos los amigos
+        /// </returns>
+        public async Task<List<string>> getFriends(string usr_name)
+        {
+            List<string> result = new List<string>();
+
+            using(HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(server_url);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(format));
+
+                HttpResponseMessage response = await client.GetAsync(mongo_users_path+"/"+usr_name);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string[] res = await response.Content.ReadAsAsync<string[]>();
+
+                    for(int i = 0; i < res.Length; i++)
+                    {
+                        result.Add(res[i]);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Status Code {0}", response.StatusCode);
+
+                    result = null;
+                }
+
+                
+            }
+
+            return result;
+        }
+
 
     }
 }
