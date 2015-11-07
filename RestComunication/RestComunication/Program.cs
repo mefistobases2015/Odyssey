@@ -27,23 +27,27 @@ namespace RestComunication
         {
             RestTools rT = new RestTools();
 
-            List<string> res = await rT.getRequests("Arturito");
+            List<string> metadata = new List<string>();
 
-            if (res.Count > 0)
+            metadata.Add("Hozier");
+            metadata.Add("Someone New");
+            metadata.Add("Braisman Songs");
+            metadata.Add("2013");
+            metadata.Add("Braisman style");
+            metadata.Add("I fall in love just a little o little bit...");
+            metadata.Add("2013-06-05 00:00:12");
+
+
+                       
+
+            if (result)
             {
-                Console.WriteLine("#YOLO#SOYUNPRO#OP#:-D");
-
-                for(int i = 0; i < res.Count; i++)
-                {
-                    Console.Write(res[i] + ", ");
-                }
-                Console.WriteLine();
+                Console.WriteLine("Sirvio");
             }
             else
             {
-                Console.WriteLine("#MeLaCorto#PutaMierda#QueSal#D-:");
+                Console.WriteLine("NI MERGAS");
             }
-
         }
     }
 

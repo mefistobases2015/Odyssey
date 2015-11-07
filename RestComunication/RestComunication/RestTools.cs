@@ -353,7 +353,7 @@ namespace RestComunication
                     if (updsng.IsSuccessStatusCode)
                     {
                         song = await updsng.Content.ReadAsAsync<Song>();
-                        Console.WriteLine("\nSe creo correctamente, metadata_id {0}", song.metadata_id);
+                        Console.WriteLine("\nSe creo correctamente, metadata_id");
                     }
 
                     else
