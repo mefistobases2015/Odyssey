@@ -20,11 +20,11 @@ namespace BlobTrial
                 //crea el cliente
                 CloudBlobClient client = account.CreateCloudBlobClient();
                 //crae el contenedor
-                CloudBlobContainer sampleContainer = client.GetContainerReference("samples");
+                CloudBlobContainer sampleContainer = client.GetContainerReference("music");
                 sampleContainer.CreateIfNotExists();
                 //
-                CloudBlockBlob blob = sampleContainer.GetBlockBlobReference("Empire.mp3");
-                using (System.IO.Stream file = System.IO.File.OpenRead("C:\\Users\\Andres\\Downloads\\Empire.mp3"))
+                CloudBlockBlob blob = sampleContainer.GetBlockBlobReference("6.mp3");
+                using (System.IO.Stream file = System.IO.File.OpenRead("C:\\Users\\Andres\\Downloads\\6.mp3"))
                 {
                     blob.UploadFromStream(file);
                 }
