@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseTrial", "DatabaseTr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQLScript", "SQLScript", "{5225B723-B51C-4F74-BFE2-C532660CD6E8}"
 	ProjectSection(SolutionItems) = preProject
-		OdysseyOffline.sql = OdysseyOffline.sql
+		LocalDatabase.sql = LocalDatabase.sql
+		Settings.xml = Settings.xml
+		View.sql = View.sql
 	EndProjectSection
 EndProject
 Global

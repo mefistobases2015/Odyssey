@@ -1,12 +1,4 @@
-﻿
-CREATE TABLE credenciales_tbl
-(
-	usr_name VARCHAR (32) NOT NULL,
-	pass VARCHAR(12) NOT NULL,
-	CONSTRAINT pk_usr_id PRIMARY KEY(usr_name)
-)
-
-CREATE TABLE propiedades_tbl
+﻿CREATE TABLE propiedades_tbl
 (
 	usr_name VARCHAR(32) NOT NULL,
 	local_song_id INT NOT NULL,
@@ -38,13 +30,6 @@ CREATE TABLE versiones_tbl
 	id3v2_year INT,
 	CONSTRAINT pk_version_id PRIMARY KEY(local_version_id, local_song_id, submission_date)
 )
-
- 
-
-ALTER TABLE propiedades_tbl
-ADD CONSTRAINT fk_usr_name
-FOREIGN KEY (usr_name)
-REFERENCES credenciales_tbl(usr_name)
 
 
 ALTER TABLE propiedades_tbl
